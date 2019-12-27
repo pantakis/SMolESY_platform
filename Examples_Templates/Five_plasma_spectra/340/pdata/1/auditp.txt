@@ -1,0 +1,28 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.2
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ C:/Bruker/TopSpin3.2.3/data/nmrsu/nmr/Graphic_plasma_Rack30_SLT_211113/340/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2013-11-26 06:22:05.762 +0000>,<nmrsu>,<CZC2524DVT>,<go>,<TOPSPIN 3.2>,
+      <created by zg
+	started at 2013-11-26 06:17:56.083 +0000,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       95 69 1F B9 9F 5E 0D 93 73 4C 53 AD 74 86 E8 F4
+       data hash MD5: 96K
+       92 96 E9 CC 7E FA E8 1D 5A 6A DB 8E 71 12 16 EB>)
+(   2,<2013-11-26 06:22:06.386 +0000>,<nmrsu>,<CZC2524DVT>,<audit>,<TOPSPIN 3.2>,
+      <user comment:
+       ICON-NMR User ID: nmrsu
+       data hash MD5: 96K
+       92 96 E9 CC 7E FA E8 1D 5A 6A DB 8E 71 12 16 EB>)
+(   3,<2013-11-26 06:22:12.204 +0000>,<nmrsu>,<CZC2524DVT>,<proc1d>,<TOPSPIN 3.2>,
+      <Start of raw data processing
+       efp 1 LB = 0.3 FT_mod = 6 PKNL = 1 PHC0 = 259.2169 PHC1 = 0 SI = 128K 
+       data hash MD5: 128K
+       3D 9F B1 10 A5 28 43 C7 CD 5C B9 9B 5F 91 4F D4>)
+##END=
+
+$$ hash MD5
+$$ 5F 5A DF 5B CD 37 44 E0 F0 29 3A 05 47 4C 65 B2
