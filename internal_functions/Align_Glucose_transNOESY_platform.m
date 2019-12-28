@@ -1,6 +1,30 @@
 
 function [YOutput,GLC_doublet] = Align_Glucose_transNOESY_platform(XAxis,YAxis,outputfolder)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
+%                                                                       %
+% National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
+% Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
+% Imperial College London, Hammersmith Campus,                          %
+% London, W12 0NN, United Kingdom                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Glucose (doublet) Calibration algorithm of processed 1D NMR spectra.
+% Based upon the 1H-NMR spectral region 5.22 - 5.29 ppm 
+% 
+% Inputs
+% XAxis: PPM data of each spectrum.
+% YAxis: Spectral data of each spectrum.
+% outputfolder:Output folder for printing a figure of aligned spectra for checking results.
+%
+%
+%
+
+
+
+
+
 Spectra = size(YAxis,1);
 for i = 1:Spectra    
     [~,ii] = find(XAxis(i,:) > 5.22 & XAxis(i,:) < 5.29);
@@ -46,24 +70,4 @@ saveas(gcf, fullfile(outputfolder,'Check Alignment to Glucose'), 'tif');
 close(f1);
 end
 
-
-function y_data = Circulate_shiftNMR(x_data,ppm_points)
-
-    existing_test = 0; 
-    if size(x_data,1) == 1
-        x_data = x_data(:); 
-        existing_test = 1; 
-    end
-    N = size(x_data,1); 
-    Round_closest = floor(N/2)+1; 
-    f = ((1:N)-Round_closest)/(N/2); 
-    p = exp(-1j*ppm_points*pi*f).'; 
-    y_data = ifft(fft(x_data).*ifftshift(p)); 
-    if isreal(x_data)
-        y_data = real(y_data); 
-    end
-    if existing_test
-        y_data = y_data.'; 
-    end
-end
 

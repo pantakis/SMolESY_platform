@@ -1,6 +1,25 @@
 
 function [Xmean,Buckets_intF] = create_buckets(XAxis,YAxis,bucket_width)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
+%                                                                       %
+% National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
+% Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
+% Imperial College London, Hammersmith Campus,                          %
+% London, W12 0NN, United Kingdom                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Creating buckets (bins) of processed 1D NMR spectra
+% 
+% Inputs
+% XAxis: PPM data of each spectrum
+% YAxis: Spectral data of each spectrum
+% bucket_width: The window of the bucketing
+%
+%
+
+
 % first measure each bucket along the XAxis
 if max(XAxis) > 0 && min(XAxis) > 0 || max(XAxis) > 0 && min(XAxis) == 0
     Bucket_times = (max(XAxis) - min(XAxis))/bucket_width;

@@ -1,6 +1,30 @@
  
 function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_transNOESY_platform(features, intensities, ena_ppm ,num, txt, outputfolder)
-            
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
+%                                                                       %
+% National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
+% Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
+% Imperial College London, Hammersmith Campus,                          %
+% London, W12 0NN, United Kingdom                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Peak Calibration algorithm of processed 1D NMR spectra to a reference
+% value taking into account the highest intesity peak in hte defined
+% spectra region.
+% 
+% Inputs
+% features: PPM data of each spectrum.
+% intensities: Spectral data of each spectrum.
+% ena_ppm: Number of points included in each ppm.
+% bucket_width: The window of the bucketing
+% num: 1) Min spectral region 2) Max spectral region 3) Ref for calibration
+% position 4) Radius of Ref value for searching the max intensity peak
+%
+%
+
+
             B11 = intensities;
             A1 = features;
             test1 = size(B11);            
@@ -98,25 +122,7 @@ function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_transNOESY_platfor
             Metabolites_ydata = M;
 end
 
-function y_data = Circulate_shiftNMR(x_data,ppm_points)
 
-    existing_test = 0; 
-    if size(x_data,1) == 1
-        x_data = x_data(:); 
-        existing_test = 1; 
-    end
-    N = size(x_data,1); 
-    Round_closest = floor(N/2)+1; 
-    f = ((1:N)-Round_closest)/(N/2); 
-    p = exp(-1j*ppm_points*pi*f).'; 
-    y_data = ifft(fft(x_data).*ifftshift(p)); 
-    if isreal(x_data)
-        y_data = real(y_data); 
-    end
-    if existing_test
-        y_data = y_data.'; 
-    end
-end
             
             
             

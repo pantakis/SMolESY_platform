@@ -20,6 +20,14 @@ function varargout = transNOESY_platform(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
+% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
+%                                                                       %
+% National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
+% Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
+% Imperial College London, Hammersmith Campus,                          %
+% London, W12 0NN, United Kingdom                                       %                                 
+
+
 % Edit the above text to modify the response to help transNOESY_platform
 
 % Last Modified by GUIDE v2.5 26-Dec-2019 00:46:14
@@ -374,7 +382,7 @@ function Spectra_folder_Callback(hObject, eventdata, handles)
         for i = 1:S
             G1 = fullfile(handles.NMRspectra_path,vresF{i},'pdata','1');
             try
-                W(i,1) = rbnmr(G1);
+                W(i,1) = getNMRdata(G1);
             catch
                 G11 = fullfile(handles.NMRspectra_path,vresF{i});
                 files2 = dir(G11);
@@ -391,7 +399,7 @@ function Spectra_folder_Callback(hObject, eventdata, handles)
                 vresFsub(KK3) = [];
                 clearvars KK KK1 KK2 KK3
                 G2 = fullfile(G11,vresFsub{1},'pdata','1');
-                W(i,1) = rbnmr(G2);
+                W(i,1) = getNMRdata(G2);
             end
         end
         figHandles = findobj('type', 'figure', '-not', 'name', 'transNOESY_platform');
@@ -439,7 +447,6 @@ function Spectra_folder_Callback(hObject, eventdata, handles)
     
 guidata(hObject, handles);
 
-
 % --- Executes on button press in Output_folder.
 function Output_folder_Callback(hObject, eventdata, handles)
 % hObject    handle to Output_folder (see GCBO)
@@ -458,12 +465,13 @@ function Excel_input_Callback(hObject, eventdata, handles)
 try
     
     [excel pathexcel] = uigetfile('*.xlsx');
+    
     wb = waitbar(0, ['\bf \fontsize{12} Please wait for loading the excel file...']);
     wbc = allchild(wb);
     jp = wbc(1).JavaPeer;
     wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
     jp.setIndeterminate(1);   
-
+    
     handles.Excelfile_path = [pathexcel excel];
     [num,txt,raw] = xlsread(handles.Excelfile_path);
     Msize = size(num);
