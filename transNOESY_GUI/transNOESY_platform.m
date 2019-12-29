@@ -653,14 +653,14 @@ if handles.PassExcel == 0
     
     
 elseif handles.PassExcel == 1
-    try
+     try
         wb = waitbar(0, ['\bf \fontsize{12} Please wait for exporting integration data...']);
         wbc = allchild(wb);
         jp = wbc(1).JavaPeer;
         wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
         jp.setIndeterminate(1);
         for i = 1:length(handles.one_metabolite_output)            
-            if  handles.X_Ints == 0
+            if  handles.X_Ints{i,1}.X == 0
                 Integrals = handles.Ints{i,1}.Ints;
                 Samples_titles = handles.Samples_titles;
                 T = table(Samples_titles,Integrals);
@@ -718,9 +718,9 @@ if handles.PassExcel == 0
                 transNOESY_ints(i,1) = SumParts;
                 clearvars Lv PosPart NegPart SumParts 
             end
-        A{1,1}.Ints = transNOESY_ints;
-        handles.Ints = A;
-        handles.X_Ints = 0;
+            A{1,1}.Ints = transNOESY_ints;
+            handles.Ints = A;
+            handles.X_Ints = 0;
         else % Bucketing
             for i = 1:size(handles.cumulativeMetabolites_data{1, 1}.data,1)
                 [Xmean,Buckets_intF] = create_buckets(handles.cumulativeMetabolites_ppm{1, 1}.data(i,:),handles.cumulativeMetabolites_data{1, 1}.data(i,:),Bucket_size);                                            
@@ -728,13 +728,9 @@ if handles.PassExcel == 0
                 Buckets_YAxis(i,1:length(Xmean)) = Buckets_intF; 
             end
             Buckets_XAxisF = mean(Buckets_XAxis,1);
-%             for i = 1:size(handles.cumulativeMetabolites_data{1, 1}.data,1)
-%                 transNOESY_ints(i,1) = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,:)),...
-%                 fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,:)),2);
-%             end
-        A{1,1}.Ints = Buckets_YAxis;
-        handles.Ints = A;
-        handles.X_Ints = Buckets_XAxisF;            
+            A{1,1}.Ints = Buckets_YAxis;
+            handles.Ints = A;
+            handles.X_Ints = Buckets_XAxisF;            
         end         
         figHandles = findobj('type', 'figure', '-not', 'name', 'transNOESY_platform');
         close(figHandles);
@@ -768,10 +764,11 @@ elseif handles.PassExcel == 1
                     transNOESY_ints(i,1) = SumParts;
                     clearvars Lv PosPart NegPart SumParts
                 end
-                A{k,1}.Ints = transNOESY_ints;                                
+                A{k,1}.Ints = transNOESY_ints;
+                Buckets_XAxisF{k,1}.X = 0;
             end
-        handles.Ints = A;
-        handles.X_Ints = 0;
+            handles.Ints = A;
+            handles.X_Ints = Buckets_XAxisF;
         else % Bucketing
             for k = 1:length(handles.Excelfile_metabolites_names)
                 for i = 1:size(handles.cumulativeMetabolites_data{k, 1}.data,1)
@@ -779,15 +776,11 @@ elseif handles.PassExcel == 1
                     Buckets_XAxis(i,1:length(Xmean)) = Xmean;
                     Buckets_YAxis(i,1:length(Xmean)) = Buckets_intF;
                 end                                
-%                 for i = 1:size(handles.cumulativeMetabolites_data{k, 1}.data,1)                                        
-%                     transNOESY_ints(i,1) = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,:)),...                    
-%                     fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,:)),2);
-%                 end
                 A{k,1}.Ints = Buckets_YAxis;
                 Buckets_XAxisF{k,1}.X = mean(Buckets_XAxis,1);
             end
-        handles.Ints = A;
-        handles.X_Ints = Buckets_XAxisF;
+            handles.Ints = A;
+            handles.X_Ints = Buckets_XAxisF;
         end
         figHandles = findobj('type', 'figure', '-not', 'name', 'transNOESY_platform');
         close(figHandles);
@@ -1062,7 +1055,7 @@ if isnan(handles.Buckets(1,1)) && handles.Quantific(1,1) == 1 % Quantification
         Peak_namesN = Peak_names(BB);    
         for i = 1:length(Peak_namesN)
             tempfold = fullfile(handles.Results_folder_path,Peak_namesN{i});
-            fileList = dir(fullfile(tempfold,'*.txt'));
+            fileList = dir(fullfile(tempfold,'*integrals.txt'));
             A = tdfread(fullfile(fileList.folder,fileList.name),'\t');
             CummulativeIntegrals(:,i) = A.Integrals;
             clearvars A fileList tempfold
