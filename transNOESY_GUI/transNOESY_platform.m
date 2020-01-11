@@ -162,10 +162,10 @@ function Clear_PickPeak_Callback(hObject, eventdata, handles)
             [row,col]=find(XAxis==max(nonzeros(XAxis)));
              MAX = XAxis(row,col);
              MAX = MAX(1,1);                        
-            axes(handles.NOESY_plot);plot(XAxis',NOESY');set(gca,'XDir','reverse');xlim([MIN MAX])                        
+            axes(handles.NOESY_plot);plot(XAxis',NOESY');set(gca,'XDir','reverse');%xlim([MIN MAX])                        
             try    
                 transNOESY = handles.transNOESY;
-                axes(handles.transNOESY_plot);plot(XAxis',transNOESY');set(gca,'XDir','reverse');xlim([MIN MAX])
+                axes(handles.transNOESY_plot);plot(XAxis',transNOESY');set(gca,'XDir','reverse');%xlim([MIN MAX])
     
             catch
                 handles.Important_notes_panel.String = 'There is no transNOESY data. Please press [transform_NOESY] button first.';
@@ -187,8 +187,8 @@ function Peak_Picking_Callback(hObject, eventdata, handles)
 % hObject    handle to Peak_Picking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-        global myData
-        myData = [];        
+         global myData
+         myData = [];        
         
         if  handles.BEEPAA == 1
             mm = msgbox('Peak picking is OFF. Please press ON');
@@ -213,6 +213,7 @@ function PeakPick_ON_Callback(hObject, eventdata, handles)
 % hObject    handle to PeakPick_ON (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
         BeepA = [];
         handles.BEEPAA = BeepA;
         handles.Peak_Picking_Status.String = 'Peak picking is ON';
@@ -223,14 +224,23 @@ guidata(hObject, handles);
 
 function buttonDownCallbackc(o,e)
          global myData
-         pos = get(gca,'CurrentPoint');
-         myData(end+1,:) = pos(1,1);
-         pp = pos(1,1:2);
-         xx = [pp(1,1) pp(1,1)];
-         yy = [pp(1,2) (pp(1,2) + 30000)];
-         plot(xx,yy,'b','LineWidth',1);hold on;set(gca,'XDir','reverse');hold on
-         h = text(pp(1,1),(pp(1,2) + 30500),['\bf \fontsize{12} ' num2str(pp(1,1))]); 
-         set(h, 'rotation', 90);
+         if length(myData) == 3 || length(myData) > 3
+            temp_my_data = sort(myData);
+            mm2 = msgbox(['You have already 3 values, min:' num2str(temp_my_data(1,:))  ' max:' num2str(temp_my_data(3,:)) ' calibration center:' num2str(temp_my_data(2,:)) '. To change any values press "Reset button"']);
+            ah2 = get( mm2, 'CurrentAxes' );
+            ch2 = get( ah2, 'Children' );
+            set( ch2, 'FontSize', 9 );        
+            return
+         else
+            pos = get(gca,'CurrentPoint');
+            myData(end+1,:) = pos(1,1);        
+            pp = pos(1,1:2);
+            xx = [pp(1,1) pp(1,1)];
+            yy = [pp(1,2) (pp(1,2) + 30000)];
+            plot(xx,yy,'b','LineWidth',1);hold on;set(gca,'XDir','reverse');hold on
+            h = text(pp(1,1),(pp(1,2) + 30500),['\bf \fontsize{12} ' num2str(pp(1,1))]); 
+            set(h, 'rotation', 90);
+         end
 
          
 % --- Executes on button press in PeakPick_OFF.
@@ -702,12 +712,12 @@ function Perform_Integration_Callback(hObject, eventdata, handles)
 global Bucket_size
 if handles.PassExcel == 0
      try
-        wb = waitbar(0, ['\bf \fontsize{12} Please wait for integrating the selected region...']);
-        wbc = allchild(wb);
-        jp = wbc(1).JavaPeer;
-        wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
-        jp.setIndeterminate(1);
         if isnan(handles.Buckets(1,1)) && handles.Quantific(1,1) == 1 % Quantification
+            wb = waitbar(0, ['\bf \fontsize{12} Please wait for integrating the selected region...']);
+            wbc = allchild(wb);
+            jp = wbc(1).JavaPeer;
+            wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
+            jp.setIndeterminate(1);
             for i = 1:size(handles.cumulativeMetabolites_data{1, 1}.data,1)
                 Lv = handles.cumulativeMetabolites_data{1, 1}.data(i,:)>=0;
                 PosPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,Lv)),...                    
@@ -722,15 +732,40 @@ if handles.PassExcel == 0
             handles.Ints = A;
             handles.X_Ints = 0;
         else % Bucketing
-            for i = 1:size(handles.cumulativeMetabolites_data{1, 1}.data,1)
-                [Xmean,Buckets_intF] = create_buckets(handles.cumulativeMetabolites_ppm{1, 1}.data(i,:),handles.cumulativeMetabolites_data{1, 1}.data(i,:),Bucket_size);                                            
-                Buckets_XAxis(i,1:length(Xmean)) = Xmean;
-                Buckets_YAxis(i,1:length(Xmean)) = Buckets_intF; 
+            if Bucket_size < 0.001
+                mm = msgbox('Bucket size should be > 0.001 PPM.');
+                ah = get( mm, 'CurrentAxes' );
+                ch = get( ah, 'Children' );
+                set( ch, 'FontSize', 8 );            
+                return
+            elseif Bucket_size > (max(handles.cumulativeMetabolites_ppm{1, 1}.data(1,:)) - min(handles.cumulativeMetabolites_ppm{1, 1}.data(1,:)))/2
+                mm = msgbox('Bucket size should be at least twice smaller the selected spectral region, please increase the spectral region or decrease the bucket size.');
+                ah = get( mm, 'CurrentAxes' );
+                ch = get( ah, 'Children' );
+                set( ch, 'FontSize', 8 );            
+                return
+            elseif isempty(Bucket_size)
+                mm = msgbox('Please enter the bucket size.');
+                ah = get( mm, 'CurrentAxes' );
+                ch = get( ah, 'Children' );
+                set( ch, 'FontSize', 8 );            
+                return
+            else
+                wb = waitbar(0, ['\bf \fontsize{12} Please wait for completing bucketing of the selected region...']);
+                wbc = allchild(wb);
+                jp = wbc(1).JavaPeer;
+                wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
+                jp.setIndeterminate(1);                
+                for i = 1:size(handles.cumulativeMetabolites_data{1, 1}.data,1)
+                    [Xmean,Buckets_intF] = create_buckets(handles.cumulativeMetabolites_ppm{1, 1}.data(i,:),handles.cumulativeMetabolites_data{1, 1}.data(i,:),Bucket_size);                                            
+                    Buckets_XAxis(i,1:length(Xmean)) = Xmean;
+                    Buckets_YAxis(i,1:length(Xmean)) = Buckets_intF; 
+                end
+                Buckets_XAxisF = mean(Buckets_XAxis,1);
+                A{1,1}.Ints = Buckets_YAxis;
+                handles.Ints = A;
+                handles.X_Ints = Buckets_XAxisF;
             end
-            Buckets_XAxisF = mean(Buckets_XAxis,1);
-            A{1,1}.Ints = Buckets_YAxis;
-            handles.Ints = A;
-            handles.X_Ints = Buckets_XAxisF;            
         end         
         figHandles = findobj('type', 'figure', '-not', 'name', 'transNOESY_platform');
         close(figHandles);
@@ -747,12 +782,13 @@ if handles.PassExcel == 0
     
 elseif handles.PassExcel == 1
     try
-        wb = waitbar(0, ['\bf \fontsize{12} Please wait for integrating the selected region...']);
-        wbc = allchild(wb);
-        jp = wbc(1).JavaPeer;
-        wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
-        jp.setIndeterminate(1);
         if isnan(handles.Buckets(1,1)) && handles.Quantific(1,1) == 1 % Quantification
+            wb = waitbar(0, ['\bf \fontsize{12} Please wait for integrating the selected region...']);
+            wbc = allchild(wb);
+            jp = wbc(1).JavaPeer;
+            wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
+            jp.setIndeterminate(1);
+
             for k = 1:length(handles.Excelfile_metabolites_names)
                 for i = 1:size(handles.cumulativeMetabolites_data{k, 1}.data,1)
                     Lv = handles.cumulativeMetabolites_data{k, 1}.data(i,:)>=0;
@@ -769,18 +805,44 @@ elseif handles.PassExcel == 1
             end
             handles.Ints = A;
             handles.X_Ints = Buckets_XAxisF;
-        else % Bucketing
-            for k = 1:length(handles.Excelfile_metabolites_names)
-                for i = 1:size(handles.cumulativeMetabolites_data{k, 1}.data,1)
-                    [Xmean,Buckets_intF] = create_buckets(handles.cumulativeMetabolites_ppm{k, 1}.data(i,:),handles.cumulativeMetabolites_data{k, 1}.data(i,:),Bucket_size);                                            
-                    Buckets_XAxis(i,1:length(Xmean)) = Xmean;
-                    Buckets_YAxis(i,1:length(Xmean)) = Buckets_intF;
-                end                                
-                A{k,1}.Ints = Buckets_YAxis;
-                Buckets_XAxisF{k,1}.X = mean(Buckets_XAxis,1);
+        else % Bucketing            
+            if Bucket_size < 0.001
+                mm = msgbox('Bucket size should be > 0.001 PPM.');
+                ah = get( mm, 'CurrentAxes' );
+                ch = get( ah, 'Children' );
+                set( ch, 'FontSize', 8 );            
+                return
+            elseif Bucket_size > (max(handles.cumulativeMetabolites_ppm{1, 1}.data(1,:)) - min(handles.cumulativeMetabolites_ppm{1, 1}.data(1,:)))/2
+                mm = msgbox('Bucket size should be at least twice smaller the selected spectral region, please increase the spectral region or decrease the bucket size.');
+                ah = get( mm, 'CurrentAxes' );
+                ch = get( ah, 'Children' );
+                set( ch, 'FontSize', 8 );            
+                return
+            elseif isempty(Bucket_size)
+                mm = msgbox('Please enter the bucket size.');
+                ah = get( mm, 'CurrentAxes' );
+                ch = get( ah, 'Children' );
+                set( ch, 'FontSize', 8 );            
+                return
+            else
+                wb = waitbar(0, ['\bf \fontsize{12} Please wait for completing bucketing of the selected region...']);
+                wbc = allchild(wb);
+                jp = wbc(1).JavaPeer;
+                wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
+                jp.setIndeterminate(1);
+                
+                for k = 1:length(handles.Excelfile_metabolites_names)
+                    for i = 1:size(handles.cumulativeMetabolites_data{k, 1}.data,1)
+                        [Xmean,Buckets_intF] = create_buckets(handles.cumulativeMetabolites_ppm{k, 1}.data(i,:),handles.cumulativeMetabolites_data{k, 1}.data(i,:),Bucket_size);                                            
+                        Buckets_XAxis(i,1:length(Xmean)) = Xmean;
+                        Buckets_YAxis(i,1:length(Xmean)) = Buckets_intF;
+                    end                                
+                    A{k,1}.Ints = Buckets_YAxis;
+                    Buckets_XAxisF{k,1}.X = mean(Buckets_XAxis,1);
+                end
+                handles.Ints = A;
+                handles.X_Ints = Buckets_XAxisF;
             end
-            handles.Ints = A;
-            handles.X_Ints = Buckets_XAxisF;
         end
         figHandles = findobj('type', 'figure', '-not', 'name', 'transNOESY_platform');
         close(figHandles);
