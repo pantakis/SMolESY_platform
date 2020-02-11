@@ -1,5 +1,5 @@
 
-function [YOutput,GLC_doublet] = Align_Glucose_transNOESY_platform(XAxis,YAxis,outputfolder)
+function [YOutput,GLC_doublet] = Align_Glucose_SMolESY_platform(XAxis,YAxis,outputfolder)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright to Dr. Panteleimon G. Takis, 2019                           % 

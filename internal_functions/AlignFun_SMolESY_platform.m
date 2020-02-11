@@ -1,5 +1,5 @@
  
-function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_transNOESY_platform(features, intensities, ena_ppm ,num, txt, outputfolder)
+function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(features, intensities, ena_ppm ,num, txt, outputfolder)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright to Dr. Panteleimon G. Takis, 2019                           % 
@@ -113,7 +113,7 @@ function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_transNOESY_platfor
                 set(gcf,'visible','off');
                 plot(XAXIS{k,1}.data',M{k,1}.data');set(gca,'XDir','reverse');xlim([num(k,1) num(k,2)])
                 saveas(gcf, fullfile(outputfolder{k,1},[txt{k,1} '-Calibrated']), 'tif');
-                figHandles = findobj('type', 'figure', '-not', 'name', 'transNOESY_platform');
+                figHandles = findobj('type', 'figure', '-not', 'name', 'SMolESY_platform');
                 close(figHandles);
                 set(gcf,'visible','on');
                 clearvars MIN row col
