@@ -2,12 +2,26 @@
 function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(features, intensities, ena_ppm ,num, txt, outputfolder)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
+% Copyright to Dr. Panteleimon G. Takis, 2020                           % 
 %                                                                       %
 % National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
 % Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
 % Imperial College London, Hammersmith Campus,                          %
-% London, W12 0NN, United Kingdom                                       %
+% London, W12 0NN, United Kingdom                                       %     
+% This program is free software: you can redistribute it and/or modify  %
+% it under the terms of the GNU General Public License as published by  %
+% the Free Software Foundation, either version 3 of the License, or     %
+% (at your option) any later version.                                   %
+%                                                                       %
+% This program is distributed in the hope that it will be useful,       %
+% but WITHOUT ANY WARRANTY; without even the implied warranty of        %
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         %
+% GNU General Public License for more details.                          %
+%                                                                       %
+% You should have received a copy of the GNU General Public License     %
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.%
+%                                                                       %    
+% Email: p.takis@imperial.ac.uk                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Peak Calibration algorithm of processed 1D NMR spectra to a reference
