@@ -30,7 +30,7 @@ function varargout = SMolESY_platform(varargin)
 
 % Edit the above text to modify the response to help SMolESY_platform
 
-% Last Modified by GUIDE v2.5 11-Feb-2020 12:06:11
+% Last Modified by GUIDE v2.5 24-May-2020 17:58:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,6 +59,15 @@ function SMolESY_platform_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to SMolESY_platform (see VARARGIN)
+Image = imread('SMolESY_plat.png');
+Icon = imresize(Image, [64, 64]);
+hM = uimenu('parent',hObject,'Label','Help');
+uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.0', 'License: GNU GPL v3',...
+    'Author: Dr. Panteleimon G. Takis','Contact: p.takis@imperial.ac.uk',...
+    'National Phenome Centre','Imperial College London'},'About','custom',Icon));
+uimenu(hM,'Label','Download Guidelines','Callback',@(~,~)web('https://drive.google.com/file/d/1iJhjjBp9MVuKCsXITWUcgboRNz7BQjA2/view'));
+uimenu(hM,'Label','Download Source code','Callback',@(~,~)web('https://github.com/pantakis/SMolESY_platform/'))
+
 
 % Choose default command line output for SMolESY_platform
 handles.output = hObject;
