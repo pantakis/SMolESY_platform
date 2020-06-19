@@ -93,7 +93,7 @@ function Procs = readnmrpar(Folder1r1iprocs)
 % Read file
 Procs_file = fullfile(Folder1r1iprocs,'procs');
 A = textread(Procs_file,'%s','whitespace','\n');
-
+A{125} = '##$TI= <>'; % in case of long characters text
 % Det. the kind of entry
 TypeOfRow = cell(length(A),2);
     
