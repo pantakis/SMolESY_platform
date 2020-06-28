@@ -731,9 +731,7 @@ if handles.PassExcel == 0
                 Lv = handles.cumulativeMetabolites_data{1, 1}.data(i,:)>=0;
                 PosPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,Lv)),...                    
                     fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,Lv)),2);
-                LTO = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
-                    ones(size(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv))))*min(handles.cumulativeMetabolites_data{1, 1}.data(i,:)));
-                NegPart = LTO - trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
+                NegPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
                     fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,~Lv)),2);
                 SumParts = PosPart - NegPart;
                 SMolESY_ints(i,1) = SumParts;
@@ -805,13 +803,11 @@ elseif handles.PassExcel == 1
                     Lv = handles.cumulativeMetabolites_data{k, 1}.data(i,:)>=0;
                     PosPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,Lv)),...                    
                         fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,Lv)),2);
-                    LTO = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                    
-                        ones(size(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv))))*min(handles.cumulativeMetabolites_data{k, 1}.data(i,:)));
-                    NegPart = LTO - trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                    
+                    NegPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                        
                         fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,~Lv)),2);
                     SumParts = PosPart - NegPart;
                     SMolESY_ints(i,1) = SumParts;
-                    clearvars Lv PosPart NegPart SumParts                 
+                    clearvars Lv PosPart NegPart SumParts
                 end
                 A{k,1}.Ints = SMolESY_ints;
                 Buckets_XAxisF{k,1}.X = 0;
