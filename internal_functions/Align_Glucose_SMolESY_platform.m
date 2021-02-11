@@ -1,5 +1,5 @@
 
-function [YOutput,GLC_doublet] = Align_Glucose_SMolESY_platform(XAxis,YAxis,outputfolder)
+function [YOutput,YOutput_NOESY,GLC_doublet] = Align_Glucose_SMolESY_platform(XAxis,YAxis,YAxis_NOESY,outputfolder)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright to Dr. Panteleimon G. Takis, 2020                           % 
@@ -67,16 +67,20 @@ for i = 1:Spectra
     D = MAXES(i,2);
     if (D < 5.25)
         YAxis_align_GLC(i,:) = Circulate_shiftNMR(YAxis(i,:),-E1(i,:));
+        YAxisNOESY_align_GLC(i,:) = Circulate_shiftNMR(YAxis_NOESY(i,:),-E1(i,:));
     elseif (D > 5.25)
         YAxis_align_GLC(i,:) = Circulate_shiftNMR(YAxis(i,:),+E1(i,:));
+        YAxisNOESY_align_GLC(i,:) = Circulate_shiftNMR(YAxis_NOESY(i,:),+E1(i,:));
     elseif (D == 5.25)
         YAxis_align_GLC(i,:) = Circulate_shiftNMR(YAxis(i,:),0);
+        YAxisNOESY_align_GLC(i,:) = Circulate_shiftNMR(YAxis_NOESY(i,:),0);
     end % shifting
     clearvars D
 end
 
 
 YOutput = YAxis_align_GLC;
+YOutput_NOESY = YAxisNOESY_align_GLC;
 GLC_doublet = MAXES;
 f1 = figure('visible','off');
 plot(XAxis',YOutput');set(gca,'XDir','reverse');xlim([5.22 5.27]);title('Check Alignment to Glucose');xlabel('PPM');

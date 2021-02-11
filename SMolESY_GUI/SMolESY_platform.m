@@ -62,10 +62,10 @@ function SMolESY_platform_OpeningFcn(hObject, eventdata, handles, varargin)
 Image = imread('SMolESY_plat.png');
 Icon = imresize(Image, [64, 64]);
 hM = uimenu('parent',hObject,'Label','Help');
-uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.0', 'License: GNU GPL v3',...
+uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.1', 'License: GNU GPL v3',...
     'Author: Dr. Panteleimon G. Takis','Contact: p.takis@imperial.ac.uk',...
     'National Phenome Centre','Imperial College London'},'About','custom',Icon));
-uimenu(hM,'Label','Download Guidelines','Callback',@(~,~)web('https://drive.google.com/file/d/1iJhjjBp9MVuKCsXITWUcgboRNz7BQjA2/view'));
+uimenu(hM,'Label','Download Guidelines','Callback',@(~,~)web('https://drive.google.com/file/d/1Y-fmqdFEmpr_QQ9W6TmYWBQ6hUSIseSq/view?usp=sharing'));
 uimenu(hM,'Label','Download Source code','Callback',@(~,~)web('https://github.com/pantakis/SMolESY_platform/'))
 
 
@@ -731,9 +731,16 @@ if handles.PassExcel == 0
                 Lv = handles.cumulativeMetabolites_data{1, 1}.data(i,:)>=0;
                 PosPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,Lv)),...                    
                     fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,Lv)),2);
-                NegPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
-                    fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,~Lv)),2);
-                SumParts = PosPart - NegPart;
+                try
+                    LTO = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
+                        ones(size(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv))))*min(handles.cumulativeMetabolites_data{1, 1}.data(i,:)));
+                    NegPart = LTO - trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
+                        fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,~Lv)),2);                    
+                catch                    
+                    NegPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{1, 1}.data(i,~Lv)),...                    
+                        fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,~Lv)),2);                                      
+                end
+                SumParts = PosPart - NegPart;  
                 SMolESY_ints(i,1) = SumParts;
                 clearvars Lv PosPart NegPart SumParts 
             end
@@ -803,11 +810,18 @@ elseif handles.PassExcel == 1
                     Lv = handles.cumulativeMetabolites_data{k, 1}.data(i,:)>=0;
                     PosPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,Lv)),...                    
                         fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,Lv)),2);
-                    NegPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                        
-                        fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,~Lv)),2);
+                    try
+                        LTO = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                    
+                            ones(size(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv))))*min(handles.cumulativeMetabolites_data{k, 1}.data(i,:)));
+                        NegPart = LTO - trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                    
+                            fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,~Lv)),2);
+                    catch
+                        NegPart = trapz(fliplr(handles.cumulativeMetabolites_ppm{k, 1}.data(i,~Lv)),...                        
+                            fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,~Lv)),2);                        
+                    end
                     SumParts = PosPart - NegPart;
                     SMolESY_ints(i,1) = SumParts;
-                    clearvars Lv PosPart NegPart SumParts
+                    clearvars Lv PosPart NegPart SumParts                 
                 end
                 A{k,1}.Ints = SMolESY_ints;
                 Buckets_XAxisF{k,1}.X = 0;
@@ -913,8 +927,10 @@ elseif handles.Pre_align(1,1) == 1 % export spectra to Glucose anomeric proton (
         jp.setIndeterminate(1);        
         YAxis = handles.SMolESYinit;
         XAxis = handles.NOESY_Xaxes;
-        
-        [Trans_aligned,GLC_doublet] = Align_Glucose_SMolESY_platform(XAxis,YAxis,handles.Results_folder_path);
+        YAxis_NOESY = handles.NOESY_spectra;
+        [Trans_aligned,NOESY_aligned,GLC_doublet] = Align_Glucose_SMolESY_platform(XAxis,YAxis,YAxis_NOESY,handles.Results_folder_path);
+        handles.NOESY_spectra = NOESY_aligned;
+        handles.SMolESY = Trans_aligned;
         D = abs(GLC_doublet(:,1) - GLC_doublet(:,2));
         [iMAX,~] = find(D > 0.007);
         [iMIN,~] = find(D < 0.0045);
@@ -951,7 +967,7 @@ elseif handles.Pre_align(1,1) == 1 % export spectra to Glucose anomeric proton (
         str21 = "]";
         str31 = "Please check the Aligned to GLUCOSE spectra at: [";
         str32 = fullfile(handles.Results_folder_path,'Check Alignment to Glucose.tif');
-        str4 = "You could proceed with plotting the 'NOT-aligned' spectra and selecting any Peaks for calibration, integration.";        
+        str4 = "You could proceed with plotting the 'Aligned to Glucose' spectra and selecting any Peaks for calibration, integration.";        
         handles.Important_notes_panel.String = str1 + str2 + str21 + newline + str31 + str32 + str21 + newline + str4;
         figHandles = findobj('type', 'figure', '-not', 'name', 'SMolESY_platform');
         close(figHandles);        
