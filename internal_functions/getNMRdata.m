@@ -1,6 +1,6 @@
 function [NMRdata] = getNMRdata(Folder1r1iprocs)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
+% Copyright to Dr. Panteleimon G. Takis, 2021                           % 
 %                                                                       %
 % National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
 % Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
@@ -40,8 +40,22 @@ ImagS = fftshift(fft(FID));
 ImagS = [ImagS(2:end);ImagS(1);];
 ImagS = ImagS.*exp(-Procs.PHC0/180*sqrt(-1)*pi - Procs.PHC1/180*sqrt(-1)*pi*flipud((0:length(FID)-1)')/length(FID));
 ImagD = -1*(flipud(imag(ImagS)));
-NMRdata.IData = [];
-NMRdata.IData = ImagD/(1^Procs.NC_proc);
+ImagD = (ImagD/(2^-Procs.NC_proc));%(1^Procs.NC_proc);
+REAL = (flipud(real(ImagS)))/(2^-Procs.NC_proc);
+IMAG = ImagD;
+
+[i,~] = find(NMRdata.XAxis > 1 & NMRdata.XAxis < 5);
+AAAA_R = REAL(i,:)./NMRdata.Data(i,:);
+AAAA_IM = IMAG(i,:)./NMRdata.IData(i,:);
+MM_R = mean(AAAA_R);
+%MM_R
+
+MM_IM = mean(AAAA_IM);
+%MM_IM
+if MM_R == MM_IM
+else
+    NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
+end
 Procs.NC_proc = 0;
 end
 
