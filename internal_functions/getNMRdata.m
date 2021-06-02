@@ -21,42 +21,46 @@ function [NMRdata] = getNMRdata(Folder1r1iprocs)
 %
 
 [NMRdata,Procs,ACQUS,filepath2] = readNMR_real_imag(Folder1r1iprocs);
+try
+    fa = fopen(fullfile(filepath2,'fid'),'r');
+    [fid] = fread(fa,'int32','l');
+    fclose(fa);
+    fidreal = fid(1:2:length(fid)).*(2^(Procs.NC_proc));
+    fidimag = fid(2:2:length(fid)).*(2^(Procs.NC_proc));
+    FID  = complex(fidreal,fidimag);
+    zf = length(NMRdata.Data)-length(FID);
+    FID = [FID;zeros(zf,1)];
+    xx = (0:length(FID)-1)/ACQUS.SW;
+    lbf = Procs.LB/ACQUS.BF1 * pi;
+    FID = FID.* exp(-lbf.*(xx)');
+    FID = FID / exp(-lbf.*(xx(ACQUS.GRPDLY+1))');
+    GrDel = (FID(1:ACQUS.GRPDLY));
+    FID = [FID( (ACQUS.GRPDLY+1):length(FID))' GrDel']';
+    ImagS = fftshift(fft(FID));
+    ImagS = [ImagS(2:end);ImagS(1);];
+    ImagS = ImagS.*exp(-Procs.PHC0/180*sqrt(-1)*pi - Procs.PHC1/180*sqrt(-1)*pi*flipud((0:length(FID)-1)')/length(FID));
+    ImagD = -1*(flipud(imag(ImagS)));
+    ImagD = (ImagD/(2^-Procs.NC_proc));%(1^Procs.NC_proc);
+    REAL = (flipud(real(ImagS)))/(2^-Procs.NC_proc);
+    IMAG = ImagD;
 
-fa = fopen(fullfile(filepath2,'fid'),'r');
-[fid] = fread(fa,'int32','l');
-fclose(fa);
-fidreal = fid(1:2:length(fid)).*(2^(Procs.NC_proc));
-fidimag = fid(2:2:length(fid)).*(2^(Procs.NC_proc));
-FID  = complex(fidreal,fidimag);
-zf = length(NMRdata.Data)-length(FID);
-FID = [FID;zeros(zf,1)];
-xx = (0:length(FID)-1)/ACQUS.SW;
-lbf = Procs.LB/ACQUS.BF1 * pi;
-FID = FID.* exp(-lbf.*(xx)');
-FID = FID / exp(-lbf.*(xx(ACQUS.GRPDLY+1))');
-GrDel = (FID(1:ACQUS.GRPDLY));
-FID = [FID( (ACQUS.GRPDLY+1):length(FID))' GrDel']';
-ImagS = fftshift(fft(FID));
-ImagS = [ImagS(2:end);ImagS(1);];
-ImagS = ImagS.*exp(-Procs.PHC0/180*sqrt(-1)*pi - Procs.PHC1/180*sqrt(-1)*pi*flipud((0:length(FID)-1)')/length(FID));
-ImagD = -1*(flipud(imag(ImagS)));
-ImagD = (ImagD/(2^-Procs.NC_proc));%(1^Procs.NC_proc);
-REAL = (flipud(real(ImagS)))/(2^-Procs.NC_proc);
-IMAG = ImagD;
+    [i,~] = find(NMRdata.XAxis > 1 & NMRdata.XAxis < 5);
+    AAAA_R = REAL(i,:)./NMRdata.Data(i,:);
+    AAAA_IM = IMAG(i,:)./NMRdata.IData(i,:);
+    MM_R = mean(AAAA_R);
+    %MM_R
 
-[i,~] = find(NMRdata.XAxis > 1 & NMRdata.XAxis < 5);
-AAAA_R = REAL(i,:)./NMRdata.Data(i,:);
-AAAA_IM = IMAG(i,:)./NMRdata.IData(i,:);
-MM_R = mean(AAAA_R);
-%MM_R
-
-MM_IM = mean(AAAA_IM);
-%MM_IM
-if MM_R == MM_IM
-else
-    NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
+    MM_IM = mean(AAAA_IM);
+    %MM_IM
+    if MM_R == MM_IM
+    else
+        NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
+    end
+    Procs.NC_proc = 0;
+catch
+    [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
 end
-Procs.NC_proc = 0;
+
 end
 
 
