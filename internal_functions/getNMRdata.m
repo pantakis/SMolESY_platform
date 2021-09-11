@@ -1,6 +1,6 @@
 function [NMRdata] = getNMRdata(Folder1r1iprocs)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Copyright to Dr. Panteleimon G. Takis, 2021                           % 
+% Copyright to Dr. Panteleimon G. Takis, 2019                           % 
 %                                                                       %
 % National Phenome Centre and Imperial Clinical Phenotyping Centre,     %
 % Department of Metabolism, Digestion and Reproduction, IRDB Building,  %
@@ -14,11 +14,13 @@ function [NMRdata] = getNMRdata(Folder1r1iprocs)
 % Folder1r1iprocs: The NMR folder containing the '1r', '1i', 'procs' files
 % for each spectrum. 
 %
+% Last Updated: 10/09/2021  
+%
 % Algorithm contains also adapted parts from rbnmr.m function:
 %
 % Nils Nyberg, Copenhagen University, nn@sund.ku.dk
 %
-%
+% 
 
 [NMRdata,Procs,ACQUS,filepath2] = readNMR_real_imag(Folder1r1iprocs);
 try
@@ -57,7 +59,15 @@ try
         NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
     end
     Procs.NC_proc = 0;
+    MAM = min(NMRdata.IData);
+    if isnan(MAM)
+        [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
+    elseif MAM == 0
+        [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
+    else       
+    end
 catch
+    clearvars NMRdata
     [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
 end
 

@@ -62,7 +62,7 @@ function SMolESY_platform_OpeningFcn(hObject, eventdata, handles, varargin)
 Image = imread('SMolESY_plat.png');
 Icon = imresize(Image, [64, 64]);
 hM = uimenu('parent',hObject,'Label','Help');
-uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.2', 'License: GNU GPL v3',...
+uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.2.2', 'License: GNU GPL v3',...
     'Author: Dr. Panteleimon G. Takis','Contact: p.takis@imperial.ac.uk',...
     'National Phenome Centre','Imperial College London'},'About','custom',Icon));
 uimenu(hM,'Label','Download Guidelines','Callback',@(~,~)web('https://drive.google.com/file/d/1Y-fmqdFEmpr_QQ9W6TmYWBQ6hUSIseSq/view?usp=sharing'));
@@ -304,7 +304,7 @@ jp = wbc(1).JavaPeer;
 wbc(1).JavaPeer.setForeground(wbc(1).JavaPeer.getForeground.cyan);
 jp.setIndeterminate(1);
 
-[Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(XAxis, SMolESY, handles.ppm_step, num, txt, output_folder);
+[Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(XAxis, SMolESY, handles.ppm_step, num, txt, output_folder, handles.Samples_titles);
 
 figHandles = findobj('type', 'figure', '-not', 'name', 'SMolESY_platform');
 close(figHandles);
