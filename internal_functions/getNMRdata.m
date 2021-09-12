@@ -62,8 +62,8 @@ try
     TEMP_NMRidata(REMS,:) = [];
     TEMP_IMAG(REMS,:) = [];
     
-    AAAA_R = TEMP_RE(i,:)./TEMP_NMRdata(i,:);
-    AAAA_IM = TEMP_IMAG(i,:)./TEMP_NMRidata(i,:);
+    AAAA_R = TEMP_RE./TEMP_NMRdata;
+    AAAA_IM = TEMP_IMAG./TEMP_NMRidata;
     MM_R = mean(AAAA_R);
     %MM_R
 
