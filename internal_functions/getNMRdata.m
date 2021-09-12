@@ -14,7 +14,7 @@ function [NMRdata] = getNMRdata(Folder1r1iprocs)
 % Folder1r1iprocs: The NMR folder containing the '1r', '1i', 'procs' files
 % for each spectrum. 
 %
-% Last Updated: 10/09/2021  
+% Last Updated: 12/09/2021  
 %
 % Algorithm contains also adapted parts from rbnmr.m function:
 %
@@ -47,8 +47,23 @@ try
     IMAG = ImagD;
 
     [i,~] = find(NMRdata.XAxis > 1 & NMRdata.XAxis < 5);
-    AAAA_R = REAL(i,:)./NMRdata.Data(i,:);
-    AAAA_IM = IMAG(i,:)./NMRdata.IData(i,:);
+    TEMP_RE = REAL(i,:);
+    TEMP_NMRdata = NMRdata.Data(i,:);
+    TEMP_IMAG = IMAG(i,:);
+    TEMP_NMRidata = NMRdata.IData(i,:);
+    
+    [j,~] = find(TEMP_RE == 0);
+    [q,~] = find(TEMP_NMRdata == 0);
+    [u,~] = find(TEMP_NMRidata == 0);
+    [v,~] = find(TEMP_IMAG == 0);
+    REMS = [j;q;u;v];
+    TEMP_RE(REMS,:) = [];
+    TEMP_NMRdata(REMS,:) = [];
+    TEMP_NMRidata(REMS,:) = [];
+    TEMP_IMAG(REMS,:) = [];
+    
+    AAAA_R = TEMP_RE(i,:)./TEMP_NMRdata(i,:);
+    AAAA_IM = TEMP_IMAG(i,:)./TEMP_NMRidata(i,:);
     MM_R = mean(AAAA_R);
     %MM_R
 
@@ -59,13 +74,6 @@ try
         NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
     end
     Procs.NC_proc = 0;
-    MAM = min(NMRdata.IData);
-    if isnan(MAM)
-        [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
-    elseif MAM == 0
-        [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
-    else       
-    end
 catch
     clearvars NMRdata
     [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
