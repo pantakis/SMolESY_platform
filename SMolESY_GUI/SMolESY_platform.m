@@ -62,7 +62,7 @@ function SMolESY_platform_OpeningFcn(hObject, eventdata, handles, varargin)
 Image = imread('SMolESY_plat.png');
 Icon = imresize(Image, [64, 64]);
 hM = uimenu('parent',hObject,'Label','Help');
-uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.2.4', 'License: GNU GPL v3',...
+uimenu(hM,'Label','About the toolbox','Callback',@(~,~)msgbox({'SMolESY platform', 'Version: 1.2.5', 'License: GNU GPL v3',...
     'Author: Dr. Panteleimon G. Takis','Contact: p.takis@imperial.ac.uk',...
     'National Phenome Centre','Imperial College London'},'About','custom',Icon));
 uimenu(hM,'Label','Download Guidelines','Callback',@(~,~)web('https://drive.google.com/file/d/1Y-fmqdFEmpr_QQ9W6TmYWBQ6hUSIseSq/view?usp=sharing'));
@@ -741,7 +741,7 @@ if handles.PassExcel == 0
                         fliplr(handles.cumulativeMetabolites_data{1, 1}.data(i,~Lv)),2);                                      
                 end
                 SumParts = PosPart - NegPart;  
-                SMolESY_ints(i,1) = abs(SumParts);
+                SMolESY_ints(i,1) = SumParts;
                 clearvars Lv PosPart NegPart SumParts 
             end
             A{1,1}.Ints = SMolESY_ints;
@@ -820,7 +820,7 @@ elseif handles.PassExcel == 1
                             fliplr(handles.cumulativeMetabolites_data{k, 1}.data(i,~Lv)),2);                        
                     end
                     SumParts = PosPart - NegPart;
-                    SMolESY_ints(i,1) = abs(SumParts);
+                    SMolESY_ints(i,1) = SumParts;
                     clearvars Lv PosPart NegPart SumParts                 
                 end
                 A{k,1}.Ints = SMolESY_ints;
