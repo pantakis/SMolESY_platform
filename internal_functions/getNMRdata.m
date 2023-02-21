@@ -14,7 +14,7 @@ function [NMRdata] = getNMRdata(Folder1r1iprocs)
 % Folder1r1iprocs: The NMR folder containing the '1r', '1i', 'procs' files
 % for each spectrum. 
 %
-% Last Updated: 12/02/2023  
+% Last Updated: 21/02/2023  
 %
 % Algorithm contains also adapted parts from rbnmr.m function:
 %
@@ -23,62 +23,88 @@ function [NMRdata] = getNMRdata(Folder1r1iprocs)
 % 
 
 [NMRdata,Procs,ACQUS,filepath2] = readNMR_real_imag(Folder1r1iprocs);
-try
-%     fa = fopen(fullfile(filepath2,'fid'),'r');
-%     [fid] = fread(fa,'int32','l');
-%     fclose(fa);
-%     fidreal = fid(1:2:length(fid)).*(2^(Procs.NC_proc));
-%     fidimag = fid(2:2:length(fid)).*(2^(Procs.NC_proc));
-%     FID  = complex(fidreal,fidimag);
-%     zf = length(NMRdata.Data)-length(FID);
-%     FID = [FID;zeros(zf,1)];
-%     xx = (0:length(FID)-1)/ACQUS.SW;
-%     lbf = Procs.LB/ACQUS.BF1 * pi;
-%     FID = FID.* exp(-lbf.*(xx)');
-%     FID = FID / exp(-lbf.*(xx(ACQUS.GRPDLY+1))');
-%     GrDel = (FID(1:ACQUS.GRPDLY));
-%     FID = [FID( (ACQUS.GRPDLY+1):length(FID))' GrDel']';
-%     ImagS = fftshift(fft(FID));
-%     ImagS = [ImagS(2:end);ImagS(1);];
-%     ImagS = ImagS.*exp(-Procs.PHC0/180*sqrt(-1)*pi - Procs.PHC1/180*sqrt(-1)*pi*flipud((0:length(FID)-1)')/length(FID));
-%     ImagD = -1*(flipud(imag(ImagS)));
-%     ImagD = (ImagD/(2^-Procs.NC_proc));%(1^Procs.NC_proc);
-%     REAL = (flipud(real(ImagS)))/(2^-Procs.NC_proc);
-%     IMAG = ImagD;
-    SM_temp = gradient(NMRdata.IData',NMRdata.XAxis');
-    [~,ii] = find(NMRdata.XAxis' > 2 & NMRdata.XAxis' < 4);
-        
-    SM_temp_test  = SM_temp(1,ii);
-    SM_temp_test_MAX = max(SM_temp_test);
-    SM_temp_test_MIN_abs = abs(min(SM_temp_test));
-    if SM_temp_test_MIN_abs > SM_temp_test_MAX
-        NMRdata.IData = 1*NMRdata.IData;
-    else
+SM_temp = gradient(NMRdata.IData',NMRdata.XAxis');
+[~,ii] = find(NMRdata.XAxis' > 2 & NMRdata.XAxis' < 4);
+    
+SM_temp_test  = SM_temp(1,ii);
+SM_temp_test_MAX = max(SM_temp_test);
+SM_temp_test_MIN_abs = abs(min(SM_temp_test));
+if SM_temp_test_MIN_abs > SM_temp_test_MAX
+    NMRdata.IData = -1*NMRdata.IData;
+    Check_phase = 1;
+else
+    Check_phase = 0;
+end
+
+try    
+%     try
+    fa = fopen(fullfile(filepath2,'fid'),'r');
+    switch ACQUS.BYTORDA
+        case 0 
+            read_bytes='l';
+        case 1
+            read_bytes='b';        
     end
+    switch ACQUS.DTYPA
+        case 0
+            precision='int32';
+        case 1  %double
+            precision='double';
+        case 2
+            precision='double';
+    end
+    
+    [fid] = fread(fa,precision,read_bytes);    
+    fclose(fa);
+    fidreal = fid(1:2:length(fid)).*(2^(Procs.NC_proc));
+    fidimag = fid(2:2:length(fid)).*(2^(Procs.NC_proc));
+    FID  = complex(fidreal,fidimag);
+    zf = length(NMRdata.Data)-length(FID);
+    FID = [FID;zeros(zf,1)];
+    xx = (0:length(FID)-1)/ACQUS.SW;
+    lbf = Procs.LB/ACQUS.BF1 * pi;
+    FID = FID.* exp(-lbf.*(xx)');
+    FID = FID / exp(-lbf.*(xx(ACQUS.GRPDLY+1))');
+    GrDel = (FID(1:ACQUS.GRPDLY));
+    FID = [FID( (ACQUS.GRPDLY+1):length(FID))' GrDel']';
+    ImagS = fftshift(fft(FID));
+    ImagS = [ImagS(2:end);ImagS(1);];
+    ImagS = ImagS.*exp(-Procs.PHC0/180*sqrt(-1)*pi - Procs.PHC1/180*sqrt(-1)*pi*flipud((0:length(FID)-1)')/length(FID));
+    ImagD = -1*(flipud(imag(ImagS)));
+    ImagD = (ImagD/(2^-Procs.NC_proc));%(1^Procs.NC_proc);
+    REAL = (flipud(real(ImagS)))/(2^-Procs.NC_proc);
+    if Check_phase == 1
+        IMAG = -ImagD;
+    else
+        IMAG = ImagD;
+    end
+    [i,~] = find(NMRdata.XAxis > 1 & NMRdata.XAxis < 5);
+    TEMP_RE = REAL(i,:);
+    TEMP_NMRdata = NMRdata.Data(i,:);
+    TEMP_IMAG = IMAG(i,:);
+    TEMP_NMRidata = NMRdata.IData(i,:);
+    [j,~] = find(TEMP_RE == 0);
+    [q,~] = find(TEMP_NMRdata == 0);
+    [u,~] = find(TEMP_NMRidata == 0);
+    [v,~] = find(TEMP_IMAG == 0);
+    REMS = [j;q;u;v];
+    TEMP_RE(REMS,:) = [];
+    TEMP_NMRdata(REMS,:) = [];
+    TEMP_NMRidata(REMS,:) = [];
+    TEMP_IMAG(REMS,:) = [];
+    
+    AAAA_R = TEMP_RE./TEMP_NMRdata;
+    AAAA_IM = TEMP_IMAG./TEMP_NMRidata;
+    MM_R = mean(AAAA_R);
+    %MM_R
 
-
-%     [j,~] = find(TEMP_RE == 0);
-%     [q,~] = find(TEMP_NMRdata == 0);
-%     [u,~] = find(TEMP_NMRidata == 0);
-%     [v,~] = find(TEMP_IMAG == 0);
-%     REMS = [j;q;u;v];
-%     TEMP_RE(REMS,:) = [];
-%     TEMP_NMRdata(REMS,:) = [];
-%     TEMP_NMRidata(REMS,:) = [];
-%     TEMP_IMAG(REMS,:) = [];
-%     
-%     AAAA_R = TEMP_RE./TEMP_NMRdata;
-%     AAAA_IM = TEMP_IMAG./TEMP_NMRidata;
-%     MM_R = mean(AAAA_R);
-%     %MM_R
-% 
-%     MM_IM = mean(AAAA_IM);
-%     %MM_IM
-%     if MM_R == MM_IM
-%     else
-%         NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
-%     end
-%     Procs.NC_proc = 0;
+    MM_IM = mean(AAAA_IM);
+    %MM_IM
+    if MM_R == MM_IM
+    else
+        NMRdata.IData = NMRdata.IData/(MM_R/MM_IM);
+    end
+    Procs.NC_proc = 0;
 catch
     clearvars NMRdata
     [NMRdata,~,~,~] = readNMR_real_imag(Folder1r1iprocs);
