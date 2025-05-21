@@ -1,5 +1,5 @@
  
-function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(features, intensities, ena_ppm ,num, txt, outputfolder)
+function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(features, intensities, ena_ppm ,num, txt, outputfolder, Samples_titles)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright to Dr. Panteleimon G. Takis, 2020                           % 
@@ -47,6 +47,7 @@ function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(f
             H = test1(1); 
             for k=1:Msize % k is the number of spin systems of the input file
                 for l = 1:H
+                    
                     % alignment-peak depiction
                     A2 = A1(l,:);
                     Z111 = A2(A2 > num(k,2));
@@ -89,21 +90,43 @@ function [Metabolites_ppm_data, Metabolites_ydata] = AlignFun_SMolESY_platform(f
                     end % shifting
                     A1111 = A2(:,Z111:Z211);
                     A_previous(l,1) = length(A1111);
-                    if l==1
-                        M{k,1}.data(l,1:length(A1111)) = KK1(1,1:length(A1111));
-                        XAXIS{k,1}.data(l,1:length(A1111)) = A1111;
-                    else
-                        if length(A1111) == A_previous(l-1,1)
+                    try
+                        if l==1
                             M{k,1}.data(l,1:length(A1111)) = KK1(1,1:length(A1111));
                             XAXIS{k,1}.data(l,1:length(A1111)) = A1111;
-                        elseif length(A1111) > A_previous(l-1,1)
-                            M{k,1}.data(l,1:A_previous(l-1,1)) = KK1(1,1:A_previous(l-1,1));
-                            XAXIS{k,1}.data(l,1:A_previous(l-1,1)) = A1111(1,1:A_previous(l-1,1));
-                        elseif length(A1111) < A_previous(l-1,1)
-                            DIF = A_previous(l-1,1) - length(A1111);
-                            M{k,1}.data(l,1:A_previous(l-1,1)) = KK(1,Z111:Z211+DIF);                             
-                            XAXIS{k,1}.data(l,1:A_previous(l-1,1)) = A2(:,Z111:Z211+DIF);    
+                        else
+                            if length(A1111) == A_previous(l-1,1)
+                                M{k,1}.data(l,1:length(A1111)) = KK1(1,1:length(A1111));
+                                XAXIS{k,1}.data(l,1:length(A1111)) = A1111;
+                            elseif length(A1111) > A_previous(l-1,1)
+                                M{k,1}.data(l,1:A_previous(l-1,1)) = KK1(1,1:A_previous(l-1,1));
+                                XAXIS{k,1}.data(l,1:A_previous(l-1,1)) = A1111(1,1:A_previous(l-1,1));
+                            elseif length(A1111) < A_previous(l-1,1)
+                                DIF = A_previous(l-1,1) - length(A1111);
+                                M{k,1}.data(l,1:A_previous(l-1,1)) = KK(1,Z111:Z211+DIF);                             
+                                XAXIS{k,1}.data(l,1:A_previous(l-1,1)) = A2(:,Z111:Z211+DIF);    
+                            end
                         end
+                    catch
+                       KK1(1,1:length(A1111)) = 0; 
+                       KK(1,length(A2)) = 0;
+                       Samples_titles{l}
+                       if l==1
+                            M{k,1}.data(l,1:length(A1111)) = KK1(1,1:length(A1111));
+                            XAXIS{k,1}.data(l,1:length(A1111)) = A1111;
+                        else
+                            if length(A1111) == A_previous(l-1,1)
+                                M{k,1}.data(l,1:length(A1111)) = KK1(1,1:length(A1111));
+                                XAXIS{k,1}.data(l,1:length(A1111)) = A1111;
+                            elseif length(A1111) > A_previous(l-1,1)
+                                M{k,1}.data(l,1:A_previous(l-1,1)) = KK1(1,1:A_previous(l-1,1));
+                                XAXIS{k,1}.data(l,1:A_previous(l-1,1)) = A1111(1,1:A_previous(l-1,1));
+                            elseif length(A1111) < A_previous(l-1,1)
+                                DIF = A_previous(l-1,1) - length(A1111);
+                                M{k,1}.data(l,1:A_previous(l-1,1)) = KK(1,Z111:Z211+DIF);                             
+                                XAXIS{k,1}.data(l,1:A_previous(l-1,1)) = A2(:,Z111:Z211+DIF);    
+                            end
+                       end
                     end
                     clearvars KK1 KK D E E1 A1111...
                         Z111 Z211 Z212 Z112 L L1 i ii DIF 
